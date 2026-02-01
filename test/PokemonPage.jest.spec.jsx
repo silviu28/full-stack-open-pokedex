@@ -9,6 +9,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 jest.mock('axios')
 
+// Add a mock listing of pokemons
 const pokemonList = {
   id: 133,
   abilities: [
@@ -60,12 +61,15 @@ const pokemonList = {
   sprites: { front_default: 'URL' }
 }
 
+// Mock a previous
 const previous = {
   url: 'https://pokeapi.co/api/v2/pokemon/132/',
   name: 'ditto',
   id: 132
 }
 
+
+// ... and a next pokemon
 const next = {
   url: 'https://pokeapi.co/api/v2/pokemon/134/',
   name: 'vaporeon',
