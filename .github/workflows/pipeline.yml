@@ -10,8 +10,14 @@ on:
       - main
 
 jobs:
-  simple_deployment_pipeline:
+  deployment_pipeline:
     runs-on: ubuntu-latest
+     if: |
+      !(
+        contains(github.event.head_commit.message, '#skip') ||
+        contains(github.event.commits[0].message, '#skip') ||
+        (github.event.pull_request && contains(github.event.pull_request.title, '#skip'))
+      )
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,6 +42,17 @@ jobs:
       - name: Trigger Render deployment
         if: ${{ github.event_name == 'push' }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+        
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    if: |
+      github.event_name == 'push' &&
+      !(
+        contains(github.event.head_commit.message, '#skip') ||
+        contains(github.event.commits[0].message, '#skip')
+      )
+    runs-on: ubuntu-latest
+    steps:
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.75.0
         env:
