@@ -51,21 +51,22 @@ jobs:
   notify_through_discord:
     needs: [deployment_pipeline]
     runs-on: ubuntu-latest
-    if: always()
+    if: ${{ always() && github.event_name == 'push' }}
     steps:
+      - uses: actions/checkout@master
       - name: Notify success through Discord
         if: ${{ success() }}
-        uses: rjstone/discord-webhook-notify@v2
+        uses: appleboy/discord-action@v1.2.0
         with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          text: Deployment successful for ${{ github.repository }}. (${{ github.sha }})
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: Deployment successful for ${{ github.repository }}. (${{ github.sha }})
 
       - name: Notify failure through Discord
         if: ${{ failure() }}
-        uses: rjstone/discord-webhook-notify@v2
+        uses: appleboy/discord-action@v1.2.0
         with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          text: Deployment failed for ${{ github.repository }}! (${{ github.sha }})
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: Deployment failed for ${{ github.repository }}! (${{ github.sha }})
         
   tag_release:
     needs: [deployment_pipeline]
@@ -87,8 +88,8 @@ jobs:
     needs: [deployment_pipeline]
     runs-on: ubuntu-latest
     steps:
-      - uses: jtak/url-health-check-action@v4
       - name: Check health URL
+        uses: jtalk/url-health-check-action@v4
         with:
           url: ${{ secrets.RENDER_HEALTH_CHECK_URL }}
           max-attempts: 3
