@@ -82,3 +82,11 @@ jobs:
         uses: anothrNick/github-tag-action@1.75.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  health_check_action:
+    needs: [deployment_pipeline]
+    runs-on: ubuntu-latest
+    with:
+      url: ${{ secrets.RENDER_HEALTH_CHECK_URL }}
+      max-attempts: 3
+      retry-delay: 5s
