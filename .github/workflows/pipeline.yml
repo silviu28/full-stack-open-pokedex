@@ -47,20 +47,24 @@ jobs:
       - name: Trigger Render deployment
         if: ${{ github.event_name == 'push' }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
-
-      - name: Notify success through Discord
-        if: ${{ success() }}
-        uses: rjstone/discord-webhook-notify@v2
-        with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          text: Deployment successful.
       
-      - name: Notify failure through Discord
-        if: ${{ failure() }}
-        uses: rjstone/discord-webhook-notify@v2
-        with:
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          text: Deployment failed!
+      
+  
+  notify_through_discord:
+    needs: [deployment_pipeline]
+    - name: Notify success through Discord
+      if: ${{ success() }}
+      uses: rjstone/discord-webhook-notify@v2
+      with:
+        webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        text: Deployment successful.
+        
+    - name: Notify failure through Discord
+      if: ${{ failure() }}
+      uses: rjstone/discord-webhook-notify@v2
+      with:
+        webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        text: Deployment failed!
         
   tag_release:
     needs: [deployment_pipeline]
@@ -72,6 +76,7 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.75.0
         env:
