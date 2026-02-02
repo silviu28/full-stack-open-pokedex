@@ -51,7 +51,7 @@ jobs:
   notify_through_discord:
     needs: [deployment_pipeline]
     runs-on: ubuntu-latest
-    if: always()
+    if: $ {{ always() && github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@master
       - name: Notify success through Discord
