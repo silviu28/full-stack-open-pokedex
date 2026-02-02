@@ -25,12 +25,16 @@ jobs:
           node-version: '20'
       - name: Install dependencies
         run: npm install
+
       - name: Check style
         run: npm run eslint
+
       - name: Run tests
         run: npm run test
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+
       - name: Run E2E tests
         run: npm run test:e2e
       - uses: actions/upload-artifact@v4
@@ -39,9 +43,24 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
       - name: Trigger Render deployment
         if: ${{ github.event_name == 'push' }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+
+      - name: Notify success through Discord
+        if: ${{ success() }}
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          text: Deployment successful.
+      
+      - name: Notify failure through Discord
+        if: ${{ failure() }}
+        uses: rjstone/discord-webhook-notify@v2
+        with:
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          text: Deployment failed!
         
   tag_release:
     needs: [deployment_pipeline]
