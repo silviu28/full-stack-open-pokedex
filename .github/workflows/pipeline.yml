@@ -53,21 +53,23 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() && github.event_name == 'push' }}
     steps:
-      - uses: actions/checkout@master
-      - name: Notify success through Discord
-        if: ${{ success() }}
-        uses: appleboy/discord-action@v1.2.0
+      - name: Sucess message
+        uses: sarisia/actions-status-discord@v1
+        if: success()
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: Deployment successful for ${{ github.repository }}. (${{ github.sha }})
+            webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+            status: Success
+            title: Deployment successful
+            description: Deployment successful for `${{ github.repository }}`. `(${{ github.sha }})`
+      - name: Failure message
+        uses: sarisia/actions-status-discord@v1
+        if: failure()
+        with:
+            webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+            status: Failure
+            title: Deployment failed
+            description: Deployment failed for `${{ github.repository }}`! `(${{ github.sha }})`
 
-      - name: Notify failure through Discord
-        if: ${{ failure() }}
-        uses: appleboy/discord-action@v1.2.0
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: Deployment failed for ${{ github.repository }}! (${{ github.sha }})
-        
   tag_release:
     needs: [deployment_pipeline]
     if: |
